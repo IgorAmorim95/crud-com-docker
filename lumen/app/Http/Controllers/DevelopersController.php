@@ -13,17 +13,43 @@ class DevelopersController extends Controller
     {
         $filter = request('q');
 
-        $paginate = Developer::where('nome', 'like', '%' . $filter . '%')
-            ->latest()
+        $query = Developer::query();
+
+        if (request('nome')) {
+            $query->where('nome', 'like', '%' . request('nome') . '%');
+        }
+        if (request('idade')) {
+            $query->where('idade', '=', request('idade'));
+        }
+        if (request('datanascimento')) {
+            $query->where('datanascimento', '=', request('datanascimento'));
+        }
+        if (request('sexo')) {
+            $query->where('sexo', '=', request('sexo'));
+        }
+        if (request('hobby')) {
+            $query->where('hobby', 'like', '%' . request('hobby') . '%');
+        }
+
+        $paginate = $query->latest()
             ->paginate(10)
             ->toArray();
 
-        $data = array_merge(
-            ['message' => 'Desenvolvedores encontrados com sucesso!'],
-            $paginate
-        );
+        if ((request('nome') || request('idade') || request('datanascimento') || request('sexo') || request('hobby')) && !count($paginate['data'])) {
+            $data = array_merge(
+                ['message' => 'Desculpe, nenhum desenvolvedor encontrado'],
+                $paginate
+            );
+            $status = 404;
+        } else {
+            $data = array_merge(
+                ['message' => 'Desenvolvedores encontrados com sucesso!'],
+                $paginate
+            );
+            $status = 200;
+        }
 
-        return response()->json($data);
+        return response()->json($data, $status);
     }
 
     public function show($id)
@@ -118,7 +144,8 @@ class DevelopersController extends Controller
         ]);
     }
 
-    public function deleteMultiple(Request $request) {
+    public function deleteMultiple(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'required'
         ]);

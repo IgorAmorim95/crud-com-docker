@@ -28,12 +28,61 @@ class DevelopersTest extends TestCase
      *
      * @test
      */
+    public function deve_ser_possivel_filtrar_desenvolvedores_por_nome_idade_sexo_datanascimento_e_hobby()
+    {
+        $randomDeveloper = \App\Models\Developer::factory()->create();
+        $developer = \App\Models\Developer::factory([
+            'nome' => 'Andre Luis Monteiro',
+            'idade' => 21,
+            'sexo' => 'M',
+            'datanascimento' => '1998-01-19',
+            'hobby' => 'Jogar'
+        ])->create();
+
+        $response = $this->get('/developers?nome=andre');
+
+        $response->response->assertOk();
+
+        $content = json_decode($response->response->getContent());
+
+        $this->assertCount(1, $content->data);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function ao_filtrar_desenvolvedores_sem_nenhum_resultado_deve_retornar_404()
+    {
+        $randomDeveloper = \App\Models\Developer::factory()->create();
+        $developer = \App\Models\Developer::factory([
+            'nome' => 'Andre Luis Monteiro',
+            'idade' => 21,
+            'sexo' => 'M',
+            'datanascimento' => '1998-01-19',
+            'hobby' => 'Jogar'
+        ])->create();
+
+        $response = $this->get('/developers?nome=pedro');
+
+        $response->response->assertNotFound();
+
+        $content = json_decode($response->response->getContent());
+
+        $this->assertCount(0, $content->data);
+    }
+
+    /**
+     *
+     * @test
+     */
     public function buscar_um_desenvolvedor_inexistente_deve_retornar_404()
     {
         $response = $this->get('/developers/1');
 
         $response->response->assertNotFound();
     }
+
 
     /**
      *

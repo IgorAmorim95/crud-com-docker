@@ -4,10 +4,35 @@
 
     <div class="box">
       <div class="flex space-between items-center mb-3">
-        <div class="flex items-center gap-1">
-          <div class="input-search">
-            <i class="fi fi-rr-search"></i>
-            <input v-model="filter" type="text" placeholder="Pesquise por desenvolvedores">
+        <div class="flex items-center gap-1 form-style">
+          <div class="form-group">
+            <label class="label-style">Nome</label>
+            <input @input="handleFilter" v-model="filter.nome" type="text" class="input-style" placeholder="Filtrar por nome">
+          </div>
+
+          <div class="form-group ml-1">
+            <label class="label-style">Idade</label>
+            <input @input="handleFilter" v-model="filter.idade" type="text" class="input-style" placeholder="Filtrar por idade">
+          </div>
+
+          <div class="form-group ml-1">
+            <label class="label-style">Sexo</label>
+            <select @change="handleFilter" v-model="filter.sexo" class="input-style">
+              <option value="">Filtrar por sexo</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+              <option value="O">Outro</option>
+            </select>
+          </div>
+
+          <div class="form-group ml-1">
+            <label class="label-style">Data de nascimento</label>
+            <input @input="handleFilter" v-model="filter.datanascimento" type="date" class="input-style" placeholder="Filtrar por data de nascimento">
+          </div>
+
+          <div class="form-group ml-1 mb-3">
+            <label class="label-style">Hobby</label>
+            <input @input="handleFilter" v-model="filter.hobby" type="text" class="input-style" placeholder="Filtrar por hobby">
           </div>
 
           <button v-if="selecteds.length" type="button" class="btn-small ml-1" @click="deleteMultipleDevelopers">
@@ -31,7 +56,8 @@
         <div class="item"></div>
         <div class="item"></div>
       </div>
-      <table class="list-records" v-if="developers">
+      <p v-if="developers && !developers.data.length">Desculpe, nenhum desenvolvedor foi encontraro</p>
+      <table class="list-records" v-if="developers && developers.data.length">
         <thead>
         <th><input :checked="selecteds.length == developers.data.length" type="checkbox" ref="selectAll"
                    @change="handleSelectAll"></th>
@@ -101,7 +127,13 @@ export default {
   data() {
     return {
       developers: undefined,
-      filter: '',
+      filter: {
+        nome: '',
+        idade: '',
+        sexo: '',
+        datanascimento: '',
+        hobby: '',
+      },
       page: 1,
       timeout: undefined,
       selecteds: []
@@ -111,8 +143,8 @@ export default {
     this.loadDevelopers()
   },
   watch: {
-    filter(val) {
-      if (val.length > 2) {
+    filter() {
+      if (this.timeout) {
         clearTimeout(this.timeout)
       }
 
@@ -122,6 +154,16 @@ export default {
     }
   },
   methods: {
+    handleFilter() {
+      if (this.timeout) {
+        clearTimeout(this.timeout)
+      }
+
+      this.timeout = setTimeout(() => {
+        this.page = 1;
+        this.loadDevelopers();
+      }, 500)
+    },
     handleSelectAll($event) {
       if ($event.target.checked) {
         let allIDs = this.developers.data.map(dev => dev.id);
@@ -150,7 +192,11 @@ export default {
       axios.get('http://localhost/developers', {
         cancelToken: source.token,
         params: {
-          q: this.filter,
+          nome: this.filter.nome,
+          idade: this.filter.idade,
+          sexo: this.filter.sexo,
+          datanascimento: this.filter.datanascimento,
+          hobby: this.filter.hobby,
           page: this.page
         }
       }).then(({data}) => {
@@ -158,6 +204,11 @@ export default {
         this.selecteds = []
       }).catch(err => {
         console.error(err)
+
+        if(err.response.status == 404) {
+          this.developers = err.response.data
+          this.selecteds = []
+        }
       })
     },
     handlePaginate(link) {
