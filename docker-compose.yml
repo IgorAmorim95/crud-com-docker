@@ -29,6 +29,7 @@ services:
     build: app
     volumes:
       - ./app:/var/www/app
+      - /var/www/app/node_modules
     working_dir: /var/www/app
     ports:
       - "8080:8080"
@@ -39,7 +40,7 @@ services:
     build: lumen
     volumes:
       - ./lumen:/var/www/html
-    working_dir: /var/www/html/app/public
+    working_dir: /var/www/html
     command: php-fpm
     links:
       - db:db
