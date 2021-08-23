@@ -141,7 +141,7 @@ class DevelopersController extends Controller
 
         return response()->json([
             'message' => 'Desenvolvedor removido com sucesso!'
-        ]);
+        ], 204);
     }
 
     public function deleteMultiple(Request $request)
@@ -156,7 +156,7 @@ class DevelopersController extends Controller
 
         return response()->json([
             'message' => 'Desenvolvedores removidos com sucesso!'
-        ]);
+        ], 204);
     }
 
     private function failValidationResponse(Validator $validator)
