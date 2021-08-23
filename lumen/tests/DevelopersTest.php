@@ -222,7 +222,7 @@ class DevelopersTest extends TestCase
 
         $response = $this->delete('/developers/1');
 
-        $response->response->assertOk();
+        $response->response->assertStatus(204);
 
         $this->missingFromDatabase('developers', [
             'nome' => $developer['nome'],
