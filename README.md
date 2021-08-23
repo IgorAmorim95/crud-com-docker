@@ -23,3 +23,9 @@ docker-compose exec php php artisan db:seed
 ```
 
 E pronto logo após isso basta acessar `localhost:8080` para visualizar a aplicação
+
+Para realizar os testes unitarios basta rodar o seguinte comando
+```
+docker-compose exec php vendor/phpunit/phpunit/phpunit tests
+```
+
